@@ -20,10 +20,10 @@ logging:
 
 ai:
   config:
-    provider: deepseek
-    api-url: https://api.deepseek.com/v1/chat/completions
+    provider: openai
+    api-url: https://api.groq.com/openai/v1/chat/completions
     api-key: ${AI_API_KEY:}
-    model: deepseek-chat
+    model: openai/gpt-oss-120b
     max-tokens: 4000
     temperature: 0.3
     request-timeout-seconds: 30

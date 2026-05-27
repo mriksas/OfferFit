@@ -20,11 +20,8 @@ public class AiConfigProperties {
     private Integer requestTimeoutSeconds;
     
     public AiConfigProperties() {
-        this.provider = "deepseek";
-        this.apiUrl = "https://api.deepseek.com/v1/chat/completions";
-        this.model = "deepseek-chat";
-        this.maxTokens = 4000;
-        this.temperature = 0.3;
-        this.requestTimeoutSeconds = 30;
+        this.apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+        this.model = "deepseek/deepseek-v4-flash:free";
+
     }
 }
