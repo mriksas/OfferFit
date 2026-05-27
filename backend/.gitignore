@@ -7,7 +7,7 @@ pom.xml.backup
 release.properties
 .flattened-pom.xml
 
-# IDE
+# IDE#
 .idea/
 *.iws
 *.iml
