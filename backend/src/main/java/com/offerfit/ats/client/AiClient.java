@@ -177,16 +177,30 @@ public class AiClient {
             List<String> strengths = parseStringList(node.path("strengths"));
             List<String> weaknesses = parseStringList(node.path("weaknesses"));
             
+            // Remove missing requirements that are already matched, and keep unique items
+            Set<String> matchedKeys = matches.stream()
+                    .map(match -> normalizeText(match.getRequirement()))
+                    .collect(Collectors.toSet());
+            missingRequirements = missingRequirements.stream()
+                    .map(this::normalizeText)
+                    .distinct()
+                    .filter(miss -> !matchedKeys.contains(miss))
+                    .collect(Collectors.toList());
+
             return AiAnalysisDto.builder()
                     .requirements(parseStringList(node.path("requirements")))
                     .candidateSkills(parseStringList(node.path("candidateSkills")))
-                    .matches(matches)
+                    .matches(matches.stream()
+                            .filter(distinctByRequirement())
+                            .collect(Collectors.toList()))
                     .missingRequirements(missingRequirements)
-                    .partialMatches(partialMatches)
+                    .partialMatches(partialMatches.stream()
+                            .filter(distinctPartialByRequirement())
+                            .collect(Collectors.toList()))
                     .experienceMatch(node.path("experienceMatch").asInt(0))
                     .educationMatch(node.path("educationMatch").asInt(0))
-                    .strengths(strengths)
-                    .weaknesses(weaknesses)
+                    .strengths(strengths.stream().distinct().collect(Collectors.toList()))
+                    .weaknesses(weaknesses.stream().distinct().collect(Collectors.toList()))
                     .summary(node.path("summary").asText("Analysis completed"))
                     .build();
         } catch (Exception e) {
@@ -194,7 +208,7 @@ public class AiClient {
             return buildFallbackAnalysis(request);
         }
     }
-    
+
     private List<SkillMatchDto> parseMatches(JsonNode matchesNode) {
         List<SkillMatchDto> matches = new ArrayList<>();
         if (matchesNode.isArray()) {
@@ -214,7 +228,7 @@ public class AiClient {
         }
         return matches;
     }
-    
+
     private List<PartialMatchDto> parsePartialMatches(JsonNode partialNode) {
         List<PartialMatchDto> partials = new ArrayList<>();
         if (partialNode.isArray()) {
@@ -233,16 +247,43 @@ public class AiClient {
         }
         return partials;
     }
-    
+
     private List<String> parseStringList(JsonNode node) {
         if (!node.isArray()) {
             return new ArrayList<>();
         }
-        return StreamSupport.stream(node.spliterator(), false)
+
+        Set<String> seen = new HashSet<>();
+        List<String> values = new ArrayList<>();
+
+        StreamSupport.stream(node.spliterator(), false)
                 .map(JsonNode::asText)
-                .collect(Collectors.toList());
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .forEach(value -> {
+                    String normalized = normalizeText(value);
+                    if (seen.add(normalized)) {
+                        values.add(value);
+                    }
+                });
+
+        return values;
     }
-    
+
+    private String normalizeText(String text) {
+        return text == null ? "" : text.trim().replaceAll("\\s+", " ").toLowerCase();
+    }
+
+    private java.util.function.Predicate<SkillMatchDto> distinctByRequirement() {
+        Set<String> seen = new HashSet<>();
+        return match -> seen.add(normalizeText(match.getRequirement()));
+    }
+
+    private java.util.function.Predicate<PartialMatchDto> distinctPartialByRequirement() {
+        Set<String> seen = new HashSet<>();
+        return partial -> seen.add(normalizeText(partial.getRequirement()));
+    }
+
     private AiAnalysisDto buildFallbackAnalysis(MatchingRequestDto request) {
         log.info("Building fallback analysis due to AI error");
         return AiAnalysisDto.builder()
