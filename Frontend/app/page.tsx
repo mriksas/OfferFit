@@ -45,7 +45,7 @@ type AnalysisResult = {
 };
 
 // Spring Boot backend URL.
-const API_URL = "https://offerfit-backend.azurewebsites.net/";
+const API_URL = "http://localhost:8080";
 
 export default function Home() {
   // YYYY-MM-DD format is required for <input type="date" /> max validation.
