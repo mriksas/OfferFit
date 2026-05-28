@@ -20,8 +20,9 @@ public class AiConfigProperties {
     private Integer requestTimeoutSeconds;
     
     public AiConfigProperties() {
-        this.apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-        this.model = "deepseek/deepseek-v4-flash:free";
+        this.apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+        this.model = "openai/gpt-oss-120b";
+        
 
     }
 }
