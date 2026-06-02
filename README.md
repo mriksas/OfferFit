@@ -7,7 +7,8 @@ First, run the frontend:
 1) Open the terminal
 2) cd frontend
 3) npm run dev
-
+4) Open http://localhost:3000/
+   
 Then run backnd:
 1) Open the separate terminal
 2) cd backend
