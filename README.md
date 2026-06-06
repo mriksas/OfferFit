@@ -6,13 +6,15 @@ First, run the frontend:
 
 1) Open the terminal
 2) cd Frontend
-3) npm run dev
-4) Open http://localhost:3000/
-   
+3) npm install
+4) npm run dev
+5) Open http://localhost:3000/
+
+
 Then run backnd:
 1) Open the separate terminal
 2) cd backend
-3) mvn spring-boot:run (make sure the maven and JDK are installed)
+3) mvn spring-boot:run (make sure Maven 3.9.16 and java 26.0.1 are installed)
 
 
 
