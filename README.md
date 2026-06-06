@@ -5,7 +5,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the frontend:
 
 1) Open the terminal
-2) cd frontend
+2) cd Frontend
 3) npm run dev
 4) Open http://localhost:3000/
    
