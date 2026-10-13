@@ -14,27 +14,15 @@ Use GPU: `Runtime` → `Change runtime type` → `T4 GPU`.
 """
 
 
-"""## Option A: Upload train.csv and validation.csv manually"""
+"""## Data loading
 
-from google.colab import files
-
-uploaded = files.upload()
-print(uploaded.keys())
-
-"""## Option B: Load dataset directly from Hugging Face
-Run this cell only if you do not upload CSV files manually.
+The dataset is loaded from Hugging Face by default and cached outside the Git
+repository. For offline use, place train.csv and validation.csv in the current
+working directory; the local files take precedence.
 """
-
-# Optional Hugging Face loading
-# from datasets import load_dataset
-# ds = load_dataset("0xnbk/resume-ats-score-v1-en")
-# print(ds)
-# ds["train"].to_pandas().to_csv("train.csv", index=False)
-# ds["validation"].to_pandas().to_csv("validation.csv", index=False)
 
 """## Training"""
 
-import os
 import json
 import math
 from pathlib import Path
@@ -55,6 +43,7 @@ from transformers import (
 
 TRAIN_PATH = "train.csv"
 VAL_PATH = "validation.csv"
+DATASET_ID = "0xnbk/resume-ats-score-v1-en"
 
 MODEL_NAME = "bert-base-uncased"
 OUTPUT_DIR = "models/ats_regression_model"
@@ -110,15 +99,42 @@ class ATSDataset(torch.utils.data.Dataset):
         return item
 
 
-def load_data(path):
-    df = pd.read_csv(path)
-
+def clean_data(df):
     df = df.dropna(subset=["text", "ats_score"]).copy()
     df["ats_score"] = pd.to_numeric(df["ats_score"], errors="coerce")
     df = df.dropna(subset=["ats_score"])
     df["ats_score"] = df["ats_score"].clip(0, 100)
 
     return df
+
+
+def load_training_data():
+    train_path = Path(TRAIN_PATH)
+    val_path = Path(VAL_PATH)
+
+    if train_path.exists() and val_path.exists():
+        print("Loading local CSV files")
+        return clean_data(pd.read_csv(train_path)), clean_data(pd.read_csv(val_path))
+
+    if train_path.exists() != val_path.exists():
+        raise FileNotFoundError(
+            "Provide both train.csv and validation.csv, or remove both to load "
+            "the dataset from Hugging Face."
+        )
+
+    print(f"Loading {DATASET_ID} from Hugging Face")
+    try:
+        from datasets import load_dataset
+    except ImportError as exc:
+        raise RuntimeError(
+            "Install the dataset loader first: pip install datasets"
+        ) from exc
+
+    dataset = load_dataset(DATASET_ID)
+    return (
+        clean_data(dataset["train"].to_pandas()),
+        clean_data(dataset["validation"].to_pandas()),
+    )
 
 
 def compute_metrics(eval_pred):
@@ -148,8 +164,7 @@ def main():
 
     print("CUDA available:", torch.cuda.is_available())
 
-    train_df = load_data(TRAIN_PATH)
-    val_df = load_data(VAL_PATH)
+    train_df, val_df = load_training_data()
 
     print("Train size:", len(train_df))
     print("Validation size:", len(val_df))

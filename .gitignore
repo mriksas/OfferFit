@@ -1,0 +1,19 @@
+# Local ML datasets and generated training artifacts
+/ML model/*.csv
+/ML model/data/
+/train.csv
+/validation.csv
+/checkpoints/
+/models/
+/ML model/checkpoints/
+/ML model/models/
+__pycache__/
+*.py[cod]
+
+# Common local files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+

@@ -40,7 +40,8 @@ The API returns the total compatibility score together with the full contributio
 - **Frontend:** Next.js, React, TypeScript, Tailwind CSS, React Hook Form, Zustand
 - **Backend:** Java 17, Spring Boot, Bean Validation, WebClient, Jackson
 - **AI layer:** configurable external semantic-analysis endpoint
-- **Research assets:** an additional Python model experiment and training/validation data under `ML model/`
+- **Research assets:** a reproducible Python model experiment under `ML model/`; the
+  dataset is loaded from Hugging Face and is not stored in this repository
 
 ## Run locally
 
